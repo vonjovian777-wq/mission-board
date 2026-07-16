@@ -136,6 +136,13 @@
   opacity: 0.65;
 }
 
+.mission-action {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: 8px;
+}
+
 .mission-status {
   color: #61dafb;
   font-size: 0.8rem;
@@ -144,6 +151,20 @@
 
 .completed .mission-status {
   color: #6edb8f;
+}
+
+.toggle-button {
+  border: 0;
+  padding: 0;
+  background-color: transparent;
+  color: #aab5c6;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.toggle-button:hover {
+  color: #ffffff;
+  text-decoration: underline;
 }
 
 .mission-body h3 {
@@ -191,8 +212,8 @@
   }
 
   .mission-card {
-    grid-template-columns: 1fr;
-    gap: 12px;
+    display: grid;
+    grid-template-columns: 130px 1fr auto;
   }
 
   .mission-reward {

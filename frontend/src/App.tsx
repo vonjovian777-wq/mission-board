@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import './App.css'
 
 type Mission = {
@@ -8,7 +9,7 @@ type Mission = {
   completed: boolean
 }
 
-const missions: Mission[] = [
+const initialMissions: Mission[] = [
   {
     id: 1,
     title: 'Reactの開発環境を構築する',
@@ -26,6 +27,30 @@ const missions: Mission[] = [
 ]
 
 function App() {
+  const [missions, setMissions] = useState<Mission[]>(initialMissions)
+
+  const toggleMission = (missionId: number) => {
+    setMissions((currentMissions) =>
+      currentMissions.map((mission) =>
+        mission.id === missionId
+          ? {
+              ...mission,
+              completed: !mission.completed,
+            }
+          : mission,
+      ),
+    )
+  }
+
+  const totalExp = missions.reduce(
+    (sum, mission) =>
+      mission.completed ? sum + mission.rewardExp : sum,
+    0,
+  )
+
+  const level = Math.floor(totalExp / 100) + 1
+  const currentExp = totalExp % 100
+
   return (
     <div className="app">
       <header className="header">
@@ -37,14 +62,18 @@ function App() {
         <div className="status-panel">
           <div>
             <span className="status-label">LEVEL</span>
-            <strong>1</strong>
+            <strong>{level}</strong>
           </div>
 
           <div className="exp-status">
             <span className="status-label">EXP</span>
-            <strong>20 / 100</strong>
+            <strong>{currentExp} / 100</strong>
+
             <div className="exp-bar">
-              <div className="exp-bar-value" />
+              <div
+                className="exp-bar-value"
+                style={{ width: `${currentExp}%` }}
+              />
             </div>
           </div>
         </div>
@@ -70,8 +99,21 @@ function App() {
                 mission.completed ? 'completed' : ''
               }`}
             >
-              <div className="mission-status">
-                {mission.completed ? '達成済み' : '進行中'}
+              <div className="mission-action">
+                <span className="mission-status">
+                  {mission.completed ? '達成済み' : '進行中'}
+                </span>
+
+                <button
+                  type="button"
+                  className="toggle-button"
+                  aria-pressed={mission.completed}
+                  onClick={() => toggleMission(mission.id)}
+                >
+                  {mission.completed
+                    ? '未達成に戻す'
+                    : '達成にする'}
+                </button>
               </div>
 
               <div className="mission-body">
