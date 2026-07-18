@@ -1,13 +1,8 @@
 import { useState } from 'react'
+import Header from './components/Header'
+import MissionCard from './components/MissionCard'
+import type { Mission } from './types/mission'
 import './App.css'
-
-type Mission = {
-  id: number
-  title: string
-  category: string
-  rewardExp: number
-  completed: boolean
-}
 
 const initialMissions: Mission[] = [
   {
@@ -53,31 +48,7 @@ function App() {
 
   return (
     <div className="app">
-      <header className="header">
-        <div>
-          <p className="header-label">DAILY QUEST SYSTEM</p>
-          <h1>Mission Board</h1>
-        </div>
-
-        <div className="status-panel">
-          <div>
-            <span className="status-label">LEVEL</span>
-            <strong>{level}</strong>
-          </div>
-
-          <div className="exp-status">
-            <span className="status-label">EXP</span>
-            <strong>{currentExp} / 100</strong>
-
-            <div className="exp-bar">
-              <div
-                className="exp-bar-value"
-                style={{ width: `${currentExp}%` }}
-              />
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header level={level} currentExp={currentExp} />
 
       <main className="main-content">
         <section className="mission-header">
@@ -93,39 +64,11 @@ function App() {
 
         <section className="mission-list">
           {missions.map((mission) => (
-            <article
+            <MissionCard
               key={mission.id}
-              className={`mission-card ${
-                mission.completed ? 'completed' : ''
-              }`}
-            >
-              <div className="mission-action">
-                <span className="mission-status">
-                  {mission.completed ? '達成済み' : '進行中'}
-                </span>
-
-                <button
-                  type="button"
-                  className="toggle-button"
-                  aria-pressed={mission.completed}
-                  onClick={() => toggleMission(mission.id)}
-                >
-                  {mission.completed
-                    ? '未達成に戻す'
-                    : '達成にする'}
-                </button>
-              </div>
-
-              <div className="mission-body">
-                <h3>{mission.title}</h3>
-                <p>カテゴリ：{mission.category}</p>
-              </div>
-
-              <div className="mission-reward">
-                <span>REWARD</span>
-                <strong>{mission.rewardExp} EXP</strong>
-              </div>
-            </article>
+              mission={mission}
+              onToggle={toggleMission}
+            />
           ))}
         </section>
       </main>
