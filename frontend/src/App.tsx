@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Header from './components/Header'
 import MissionCard from './components/MissionCard'
 import MissionForm from './components/MissionForm'
+import {  loadMissions,  saveMissions} from './services/missionStorage'
 import type { Mission } from './types/mission'
 import './App.css'
 
@@ -23,12 +24,18 @@ const initialMissions: Mission[] = [
 ]
 
 function App() {
-  const [missions, setMissions] = useState<Mission[]>(initialMissions)
+  const [missions, setMissions] = useState<Mission[]>(
+    () => loadMissions(initialMissions),
+  )
 
   const [isFormOpen, setIsFormOpen] = useState(false)
 
   const [editingMissionId, setEditingMissionId] =
   useState<number | null>(null)
+
+  useEffect(() => {
+  saveMissions(missions)
+}, [missions])
 
   const toggleMission = (missionId: number) => {
     setMissions((currentMissions) =>
