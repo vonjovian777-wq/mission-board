@@ -52,6 +52,19 @@
 
 - Vite
 
+### バックエンド
+
+- Java 25
+- Spring Boot 4.1.0
+- Spring Web
+- Maven
+- 組み込みTomcat
+
+### バックエンド開発環境
+
+- IntelliJ IDEA
+- Eclipse Temurin 25
+
 ### バージョン管理
 
 - Git
@@ -81,8 +94,11 @@ React + TypeScript + Viteによるフロントエンド環境を構築し、
 React単体での基本機能と、
 localStorageによる簡易的なデータ永続化まで実装済みです。
 
-次の段階では、Spring Bootによるバックエンド環境を構築し、
-その後ReactからAPI経由でミッションデータを操作できる構成へ移行する予定です。
+Spring Bootによるバックエンド環境を構築し、
+`GET /api/missions`から仮のミッションデータをJSON形式で返すAPIを実装しました。
+
+次の段階では、ReactからこのAPIを呼び出し、
+必要に応じてCORS設定を追加してフロントエンドとバックエンドを接続します。
 
 ## ドキュメント
 
