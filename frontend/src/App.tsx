@@ -34,8 +34,30 @@ function App() {
   useState<number | null>(null)
 
   useEffect(() => {
-  saveMissions(missions)
-}, [missions])
+    saveMissions(missions)
+  }, [missions])
+
+  useEffect(() => {
+    const fetchMissions = async () => {
+      try {
+        const response = await fetch(
+          'http://localhost:8080/api/missions',
+        )
+
+        if (!response.ok) {
+          throw new Error(`API取得エラー: ${response.status}`)
+        }
+
+        const data: Mission[] = await response.json()
+
+        setMissions(data)
+      } catch (error) {
+        console.error('ミッションの取得に失敗しました:', error)
+      }
+    }
+
+    fetchMissions()
+  }, [])
 
   const toggleMission = (missionId: number) => {
     setMissions((currentMissions) =>

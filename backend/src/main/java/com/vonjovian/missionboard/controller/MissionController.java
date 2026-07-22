@@ -1,5 +1,6 @@
 package com.vonjovian.missionboard.controller;
 
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -9,6 +10,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/missions")
+@CrossOrigin(origins = "http://localhost:5173")
 public class MissionController {
 
     @GetMapping
@@ -17,8 +19,8 @@ public class MissionController {
                 Map.of(
                         "id", 1,
                         "title", "Spring Boot APIを作成する",
-                        "description", "Java側からミッションデータを返す",
-                        "exp", 100,
+                        "category", "開発",
+                        "rewardExp", 100,
                         "completed", false
                 )
         );
