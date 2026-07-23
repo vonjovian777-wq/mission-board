@@ -73,24 +73,38 @@ function App() {
   }
 
   // ミッションを追加する関数
-  const addMission = (
+  const addMission = async (
     title: string,
     category: string,
     rewardExp: number,
   ) => {
-    const newMission: Mission = {
-      id: Date.now(),
-      title,
-      category,
-      rewardExp,
-      completed: false,
+    try {
+      const response = await fetch("http://localhost:8080/api/missions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title,
+          category,
+          rewardExp,
+          completed: false,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error(`ミッションの追加に失敗しました: ${response.status}`)
+      }
+
+      const newMission: Mission = await response.json()
+
+      setMissions((currentMissions) => [
+        ...currentMissions,
+        newMission,
+      ])
+    } catch (error) {
+      console.error(error)
     }
-
-    setMissions((currentMissions) => [
-      ...currentMissions,
-      newMission,
-    ])
-
   }
 
   // ミッションを削除する関数
