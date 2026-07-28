@@ -108,7 +108,7 @@ function App() {
   }
 
   // ミッションを削除する関数
-  const deleteMission = (missionId: number) => {
+  const deleteMission = async (missionId: number) => {
     const targetMission = missions.find(
       (mission) => mission.id === missionId,
     )
@@ -127,19 +127,36 @@ function App() {
       return
     }
 
-    // 編集中のミッションが削除対象の場合は、編集状態を解除
-    setEditingMissionId((currentMissionId) =>
-      currentMissionId === missionId
-        ? null
-        : currentMissionId,
-    )
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/missions/${missionId}`,
+        {
+          method: 'DELETE',
+        },
+      )
 
-    // 対象以外のミッションを残すようにフィルタリングして更新
-    setMissions((currentMissions) =>
-      currentMissions.filter(
-        (mission) => mission.id !== missionId,
-      ),
-    )
+      if (!response.ok) {
+        throw new Error(
+          `ミッションの削除に失敗しました: ${response.status}`,
+        )
+      }
+
+      // 編集中のミッションが削除対象の場合は、編集状態を解除
+      setEditingMissionId((currentMissionId) =>
+        currentMissionId === missionId
+          ? null
+          : currentMissionId,
+      )
+
+      // APIでの削除成功後、画面上からも対象を削除
+      setMissions((currentMissions) =>
+        currentMissions.filter(
+          (mission) => mission.id !== missionId,
+        ),
+      )
+    } catch (error) {
+      console.error(error)
+    }
   }
 
   // ミッションの編集を開始する関数
@@ -160,26 +177,59 @@ function App() {
     setEditingMissionId(null)
   }
 
-  const updateMission = (
+  // ミッションを更新する関数
+  const updateMission = async (
     missionId: number,
     title: string,
     category: string,
     rewardExp: number,
   ) => {
-    setMissions((currentMissions) =>
-      currentMissions.map((mission) =>
-        mission.id === missionId && !mission.completed
-          ? {
-              ...mission,
-              title,
-              category,
-              rewardExp,
-            }
-          : mission,
-      ),
+    const targetMission = missions.find(
+      (mission) => mission.id === missionId,
     )
 
-    setEditingMissionId(null)
+    if (!targetMission || targetMission.completed) {
+      return
+    }
+
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/missions/${missionId}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title,
+            category,
+            rewardExp,
+            completed: targetMission.completed,
+          }),
+        },
+      )
+
+      if (!response.ok) {
+        throw new Error(
+          `ミッションの更新に失敗しました: ${response.status}`,
+        )
+      }
+
+      const savedMission: Mission = await response.json()
+
+      // APIで更新された内容を画面にも反映
+      setMissions((currentMissions) =>
+        currentMissions.map((mission) =>
+          mission.id === savedMission.id
+            ? savedMission
+            : mission,
+        ),
+      )
+
+      setEditingMissionId(null)
+    } catch (error) {
+      console.error(error)
+    }
   }
 
   const totalExp = missions.reduce(

@@ -7,6 +7,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,5 +48,29 @@ public class MissionController {
         missions.add(mission);
 
         return mission;
+    }
+
+    @PutMapping("/{id}")
+    public Mission updateMission(
+            @PathVariable Long id,
+            @RequestBody Mission updatedMission
+    ) {
+        for (Mission mission : missions) {
+            if (mission.getId().equals(id)) {
+                mission.setTitle(updatedMission.getTitle());
+                mission.setCategory(updatedMission.getCategory());
+                mission.setRewardExp(updatedMission.getRewardExp());
+                mission.setCompleted(updatedMission.isCompleted());
+
+                return mission;
+            }
+        }
+
+        return null;
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteMission(@PathVariable Long id) {
+        missions.removeIf(mission -> mission.getId().equals(id));
     }
 }
