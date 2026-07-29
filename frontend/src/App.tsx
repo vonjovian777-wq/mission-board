@@ -2,40 +2,16 @@ import { useEffect, useState } from 'react'
 import Header from './components/Header'
 import MissionCard from './components/MissionCard'
 import MissionForm from './components/MissionForm'
-import {  loadMissions,  saveMissions} from './services/missionStorage'
 import type { Mission } from './types/mission'
 import './App.css'
 
-const initialMissions: Mission[] = [
-  {
-    id: 1,
-    title: 'Reactの開発環境を構築する',
-    category: '開発',
-    rewardExp: 30,
-    completed: false,
-  },
-  {
-    id: 2,
-    title: 'READMEと基本設計書を更新する',
-    category: '開発',
-    rewardExp: 10,
-    completed: true,
-  },
-]
-
 function App() {
-  const [missions, setMissions] = useState<Mission[]>(
-    () => loadMissions(initialMissions),
-  )
+  const [missions, setMissions] = useState<Mission[]>([])
 
   const [isFormOpen, setIsFormOpen] = useState(false)
 
   const [editingMissionId, setEditingMissionId] =
   useState<number | null>(null)
-
-  useEffect(() => {
-    saveMissions(missions)
-  }, [missions])
 
   useEffect(() => {
     const fetchMissions = async () => {
@@ -59,18 +35,31 @@ function App() {
     fetchMissions()
   }, [])
 
-  const toggleMission = (missionId: number) => {
-    setMissions((currentMissions) =>
-      currentMissions.map((mission) =>
-        mission.id === missionId
-          ? {
-              ...mission,
-              completed: !mission.completed,
-            }
-          : mission,
-      ),
-    )
-  }
+  // ミッションの完了状態を切り替える関数
+  const toggleMission = async (id: number) => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/missions/${id}/toggle`,
+        {
+          method: "PATCH",
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("ミッションの状態変更に失敗しました");
+      }
+
+      const updatedMission: Mission = await response.json();
+
+      setMissions((currentMissions) =>
+        currentMissions.map((mission) =>
+          mission.id === id ? updatedMission : mission,
+        ),
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   // ミッションを追加する関数
   const addMission = async (
