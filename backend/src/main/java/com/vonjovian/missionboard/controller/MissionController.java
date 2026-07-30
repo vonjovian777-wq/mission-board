@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +53,7 @@ public class MissionController {
     }
 
     @PutMapping("/{id}")
-    public Mission updateMission(
+    public ResponseEntity<Mission> updateMission(
             @PathVariable Long id,
             @RequestBody Mission updatedMission
     ) {
@@ -63,28 +64,36 @@ public class MissionController {
                 mission.setRewardExp(updatedMission.getRewardExp());
                 mission.setCompleted(updatedMission.isCompleted());
 
-                return mission;
+                return ResponseEntity.ok(mission);
             }
         }
 
-        return null;
+        return ResponseEntity.notFound().build();
     }
 
     @PatchMapping("/{id}/toggle")
-    public Mission toggleMission(@PathVariable Long id) {
+    public ResponseEntity<Mission> toggleMission(@PathVariable Long id) {
         for (Mission mission : missions) {
             if (mission.getId().equals(id)) {
                 mission.setCompleted(!mission.isCompleted());
 
-                return mission;
+                return ResponseEntity.ok(mission);
             }
         }
 
-        return null;
+        return ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}")
-    public void deleteMission(@PathVariable Long id) {
-        missions.removeIf(mission -> mission.getId().equals(id));
+    public ResponseEntity<Void> deleteMission(@PathVariable Long id) {
+        boolean removed = missions.removeIf(
+                mission -> mission.getId().equals(id)
+        );
+
+        if (removed) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.notFound().build();
     }
 }
