@@ -1,6 +1,7 @@
 package com.vonjovian.missionboard.controller;
 
 import com.vonjovian.missionboard.Mission;
+import com.vonjovian.missionboard.repository.MissionRepository;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,7 +14,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.http.ResponseEntity;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -21,35 +21,23 @@ import java.util.List;
 @CrossOrigin(origins = "http://localhost:5173")
 public class MissionController {
 
-    private final List<Mission> missions = new ArrayList<>();
+    private final MissionRepository missionRepository;
 
-    private long nextId = 2L;
-
-    public MissionController() {
-        missions.add(
-                new Mission(
-                        1L,
-                        "Spring Boot APIを作成する",
-                        "開発",
-                        100,
-                        false
-                )
-        );
+    public MissionController(MissionRepository missionRepository) {
+        this.missionRepository = missionRepository;
     }
 
     @GetMapping
     public List<Mission> getMissions() {
-        return missions;
+        return missionRepository.findAll();
     }
 
     @PostMapping
     public Mission createMission(@RequestBody Mission mission) {
-        mission.setId(nextId++);
+        mission.setId(null);
         mission.setCompleted(false);
 
-        missions.add(mission);
-
-        return mission;
+        return missionRepository.save(mission);
     }
 
     @PutMapping("/{id}")
@@ -57,43 +45,40 @@ public class MissionController {
             @PathVariable Long id,
             @RequestBody Mission updatedMission
     ) {
-        for (Mission mission : missions) {
-            if (mission.getId().equals(id)) {
-                mission.setTitle(updatedMission.getTitle());
-                mission.setCategory(updatedMission.getCategory());
-                mission.setRewardExp(updatedMission.getRewardExp());
-                mission.setCompleted(updatedMission.isCompleted());
+        return missionRepository.findById(id)
+                .map(mission -> {
+                    mission.setTitle(updatedMission.getTitle());
+                    mission.setCategory(updatedMission.getCategory());
+                    mission.setRewardExp(updatedMission.getRewardExp());
+                    mission.setCompleted(updatedMission.isCompleted());
 
-                return ResponseEntity.ok(mission);
-            }
-        }
-
-        return ResponseEntity.notFound().build();
+                    return ResponseEntity.ok(
+                            missionRepository.save(mission)
+                    );
+                })
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PatchMapping("/{id}/toggle")
     public ResponseEntity<Mission> toggleMission(@PathVariable Long id) {
-        for (Mission mission : missions) {
-            if (mission.getId().equals(id)) {
-                mission.setCompleted(!mission.isCompleted());
+        return missionRepository.findById(id)
+                .map(mission -> {
+                    mission.setCompleted(!mission.isCompleted());
 
-                return ResponseEntity.ok(mission);
-            }
-        }
-
-        return ResponseEntity.notFound().build();
+                    return ResponseEntity.ok(
+                            missionRepository.save(mission)
+                    );
+                })
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMission(@PathVariable Long id) {
-        boolean removed = missions.removeIf(
-                mission -> mission.getId().equals(id)
-        );
-
-        if (removed) {
-            return ResponseEntity.noContent().build();
+        if (!missionRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
         }
 
-        return ResponseEntity.notFound().build();
+        missionRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }
