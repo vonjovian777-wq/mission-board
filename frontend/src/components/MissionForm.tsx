@@ -5,7 +5,7 @@ type MissionFormProps = {
     title: string,
     category: string,
     rewardExp: number,
-  ) => void
+  ) => Promise<boolean>
 }
 
 function MissionForm({ onAdd }: MissionFormProps) {
@@ -19,7 +19,7 @@ function MissionForm({ onAdd }: MissionFormProps) {
     setRewardExp('10')
   }
 
-  const handleSubmit = (
+  const handleSubmit = async (
     event: FormEvent<HTMLFormElement>,
   ) => {
     event.preventDefault()
@@ -47,8 +47,15 @@ function MissionForm({ onAdd }: MissionFormProps) {
         return
     }
 
-    onAdd(trimmedTitle, category, parsedRewardExp)
-    resetForm()
+    const wasAdded = await onAdd(
+      trimmedTitle,
+      category,
+      parsedRewardExp,
+    )
+
+    if (wasAdded) {
+      resetForm()
+    }
   }
 
   return (

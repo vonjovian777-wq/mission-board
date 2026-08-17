@@ -16,6 +16,8 @@ function App() {
   const [missions, setMissions] = useState<Mission[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [actionErrorMessage, setActionErrorMessage] =
+    useState<string | null>(null)
 
   const [isFormOpen, setIsFormOpen] = useState(false)
 
@@ -44,6 +46,8 @@ function App() {
 
   // ミッションの完了状態を切り替える関数
   const toggleMission = async (id: number) => {
+    setActionErrorMessage(null)
+
     try {
       const updatedMission = await toggleMissionStatus(id)
 
@@ -54,6 +58,9 @@ function App() {
       )
     } catch (error) {
       console.error('ミッションの更新に失敗しました:', error)
+      setActionErrorMessage(
+        'ミッションの達成状態を変更できませんでした',
+      )
     }
   }
 
@@ -63,6 +70,9 @@ function App() {
     category: string,
     rewardExp: number,
   ) => {
+
+    setActionErrorMessage(null)
+
     try {
       const newMission = await createMission(
         title,
@@ -74,8 +84,13 @@ function App() {
         ...currentMissions,
         newMission,
       ])
+
+      return true
     } catch (error) {
       console.error('ミッションの追加に失敗しました:', error)
+      setActionErrorMessage('ミッションを追加できませんでした')
+
+      return false
     }
   }
 
@@ -97,6 +112,8 @@ function App() {
       return
     }
 
+    setActionErrorMessage(null)
+
     try {
       await deleteMissionById(missionId)
 
@@ -111,6 +128,7 @@ function App() {
       }
     } catch (error) {
       console.error('ミッションの削除に失敗しました:', error)
+      setActionErrorMessage('ミッションを削除できませんでした')
     }
   }
 
@@ -147,6 +165,8 @@ function App() {
       return
     }
 
+    setActionErrorMessage(null)
+
     try {
       const updatedMission = await updateMissionById(
         missionId,
@@ -167,6 +187,7 @@ function App() {
       setEditingMissionId(null)
     } catch (error) {
       console.error('ミッションの更新に失敗しました:', error)
+      setActionErrorMessage('ミッションを更新できませんでした')
     }
   }
 
@@ -216,6 +237,12 @@ function App() {
             <MissionForm onAdd={addMission} />
           </div>
         </div>
+
+        {actionErrorMessage && (
+          <div className="mission-action-error" role="alert">
+            {actionErrorMessage}
+          </div>
+        )}
 
         <section className="mission-list">
           {isLoading ? (
